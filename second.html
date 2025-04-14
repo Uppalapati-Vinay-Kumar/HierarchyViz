@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Treemap</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script> 
+  <script src="second.js" defer></script>
+  <style>
+    .input-container,.dropdown-container {
+      display: block;
+      margin: 10px auto;
+      text-align: center;
+    }
+
+    .input-container input {
+      margin: 5px;
+    }
+
+    .file-container {
+      display: inline-block;
+      margin-left: 20px;
+    }
+
+    #my_dataviz {
+      width: 800px;
+      height: 620px;
+    }
+
+    #visualizations-container {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px;
+      border: 1px solid #ccc;
+      height: 625px;
+    }
+
+    #my_treeStructure {
+      flex: 1;
+      margin: 10px;
+      border: 1px solid #ccc;
+      height: 400px;
+      overflow: auto;
+    }
+
+    .tooltip {
+      position: absolute;
+      text-align: center;
+      padding: 4px;
+      font: 12px sans-serif;
+      background: lightgray;
+      border: 1px solid #333;
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    #levelDisplay {
+      flex: 0 0 10%;
+      text-align: center;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }
+
+    #levelDisplay h2 {
+      margin: 0 0 10px;
+    }
+
+    #pyramidSvg {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="input-container">
+    <label for="csvFileInput">Import CSV File:</label>
+    <input type="file" id="csvFileInput" accept=".csv">
+    <button id="importButton">Import CSV</button>
+  </div>
+
+  <div class="input-container">
+    <label for="numericalColumnInput">Numerical Column Name:</label>
+    <input type="text" id="numericalColumnInput" placeholder="Enter numerical column name">
+    <select id="drillDownDropdown" size="1" style="width: 200px; margin-left: 10px; overflow-y: auto;"></select>
+    <!-- <button onclick="setHierarchy()">Set Hierarchy</button> -->
+  </div>
+
+  <div class="input-container">
+    <label for="sequenceInput">Column Sequence:</label>
+    <input type="text" id="sequenceInput" placeholder="Enter column sequence">
+    <button onclick="setHierarchy()">Update</button>
+  </div>
+
+  <div class="dropdown-container" style="display:none;">
+    <label for="categorySelect">Select Category:</label>
+    <select id="categorySelect"></select>
+  </div>
+
+  <div id="visualizations-container">
+    <div id="my_dataviz" style="flex: 1; margin-right: 20px;">
+    </div>
+    <div id="levelDisplay">
+      <h2>Level Information</h2>
+      <svg id="pyramidSvg"></svg>
+    </div>
+  </div>
+
+  <div id="my_treeStructure">
+    <svg id="treeSvg" width="1000" height="400"></svg>
+  </div>
+
+  <div id="tooltip" class="tooltip"></div>
+</body>
+
+</html>

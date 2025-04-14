@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "dependency"
+version = "0.1.0"
+description = "ML Model project"
+authors = ["Vinay Kumar"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.2.3"
+scikit-learn = "^1.5.2"
+joblib = "^1.4.2"
+numpy = "^2.1.2"
+permutations = "^0.2.0"
+scipy = "^1.14.1"
+networkx = "^3.4.2"
+matplotlib = "^3.9.2"
+sentence-transformers = "^3.3.1"
+flask = "^3.1.0"
+flask-cors = "^5.0.1"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

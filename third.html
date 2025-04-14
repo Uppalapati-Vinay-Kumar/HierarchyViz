@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Preprocessing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Data Preprocessing Guidelines</h2>
+    <p>These guidelines should be followed to visualize the data hierarchically without any issues.</p>
+
+    <div class="section">
+        <h3>1. Meaningful Column Names</h3>
+        <ul>
+            <li>Column names should clearly describe the data they hold.</li>
+            <li>Avoid vague names like <code>name</code> – instead, use <code>Country_Name</code> or <code>Book_Title</code>.</li>
+            <li>Ensure consistency in column names across datasets.</li>
+            <li>Use underscores (<code>_</code>) or PascalCase for multi-word column names to improve readability.</li>
+        </ul>
+        <!-- <img src="meaningful_column_names.jpg" alt="Meaningful Column Names"> -->
+    </div>
+
+    <div class="section">
+        <h3>2. Handling Commas in Column Values</h3>
+        <ul>
+            <li>Commas should only be used in hierarchical data.</li>
+            <li>For example, a column containing <code>USA, NJ, Glassboro</code> is acceptable as it represents a hierarchy.</li>
+            <li>If a column contains non-hierarchical text (e.g., book titles), commas should be removed or enclosed properly.</li>
+        </ul>
+        <strong>Examples:</strong>
+        <ul>
+            <li><strong>Incorrect:</strong> <code>The Great Gatsby, a novel, written by F. Scott Fitzgerald</code></li>
+            <li><strong>Correct:</strong> <code>The Great Gatsby - A Novel by F. Scott Fitzgerald</code></li>
+        </ul>
+        <!-- <img src="handling_commas.jpg" alt="Handling Commas in Data"> -->
+    </div>
+
+    <div class="section">
+        <h3>3. Converting Numeric Columns for Hierarchical Data</h3>
+        <ul>
+            <li>If a numeric column is meant for hierarchy, treat it as a string.</li>
+            <li>Add a single quote (<code>'</code>) before each numeric value to ensure correct interpretation.</li>
+        </ul>
+        <strong>Examples:</strong>
+        <ul>
+            <li><strong>Incorrect:</strong> <code>101, 102, 103</code></li>
+            <li><strong>Correct:</strong> <code>'101, '102, '103</code></li>
+        </ul>
+        <ul>
+            <li>This ensures that the numeric column is interpreted as categorical data instead of continuous numbers.</li>
+        </ul>
+        <!-- <img src="numeric_hierarchy.jpg" alt="Converting Numeric Columns for Hierarchy"> -->
+    </div>
+
+</body>
+
+</html>
