@@ -40,7 +40,7 @@ poetry install
 
 The `model1.joblib` file is too large to be hosted on GitHub. To proceed, download the model from the provided link and place it in the **same directory** as `server.py`.
 
-👉 **[Download the model file here](https://your-link.com)** (replace with your actual link)
+👉 **[Download the model file here](https://drive.google.com/file/d/1cvhH8MsJt2-YKPdbs7mNE-dQML1Ib9c7/view?usp=sharing)**
 
 > **Important**: The model file must be in the same folder as `server.py` to ensure everything works properly.
 
@@ -72,8 +72,7 @@ The frontend will automatically connect to the backend server and you can start 
 ## 📎 Model File Download
 
 Due to size limits, `model1.joblib` is not included in this repository.  
-👉 **[Download the model file here](https://your-link.com)** (replace with your actual download link)
-
+👉 **[Download the model file here](https://drive.google.com/file/d/1cvhH8MsJt2-YKPdbs7mNE-dQML1Ib9c7/view?usp=sharing)**
 ---
 
 ## ## 📋 License
