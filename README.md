@@ -6,7 +6,7 @@ This is an automated visualization system which uses sentence transformers and h
 
 ## 🚀 How to Run the Project
 
-This project uses [Poetry](https://python-poetry.org/) for dependency management.
+This project uses [Poetry](https://python-poetry.org/docs/) for dependency management.
 
 ### 🧰 Prerequisites
 
