@@ -7,6 +7,7 @@ from flask_cors import CORS
 import pandas as pd
 import numpy as np
 import io
+import os
 import joblib
 
 app = Flask(__name__)
@@ -147,4 +148,6 @@ def process_csv():
 
 if __name__ == '__main__':
     print("Starting Flask server...")
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))  
+    app.run(host='0.0.0.0', port=port)
+
