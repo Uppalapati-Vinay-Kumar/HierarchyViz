@@ -168,7 +168,7 @@ function populateDropdown(values) {
 
 // Function to handle the imported csv data and call the server to determine the multiple hierarchies and also predict the proper seqeunce for  
 // each of them using the ML model. Get the predicted clusters from the server and calls the function to populate the sorted clusters in dropdown.
-function handleImport() {
+async function handleImport() {
     const input = document.getElementById('csvFileInput');
     if (!input.files || input.files.length === 0) {
         alert('Please select a CSV file to import.');
@@ -181,33 +181,35 @@ function handleImport() {
     reader.onload = async function(event) {
         const csvData = event.target.result;
 
-        // Send CSV data to Python Flask API
         const formData = new FormData();
         formData.append('file', file);
 
         try {
-            const response = await fetch('http://127.0.0.1:5000/process_csv', {
+            const response = await fetch('https://hierarchyviz.onrender.com/process_csv', {
                 method: 'POST',
                 body: formData
             });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.statusText}`);
+            }
 
             const data = await response.json();
 
             if (data.error) {
                 console.error("Error from server:", data.error);
+                alert("Server error: " + data.error);
                 return;
             }
 
-            // console.log("Clusters received from Python:", data.clusters);
             const sortedClusters = data.clusters;
-            //console.log("Formatted Hierarchy for Dropdown:", Object.values(sortedClusters).map(arr => arr.join(', ')));
             populateDropdown(Object.values(sortedClusters).map(arr => arr.join(', ')));
         } catch (error) {
-            console.error("Error fetching from Python:", error);
+            console.error("Error fetching from Flask API:", error);
+            alert("Something went wrong while processing the file.");
         }
 
         globalCsvData = csvData;
-
     };
 
     reader.readAsText(file);
