@@ -183,15 +183,20 @@ async function handleImport() {
         formData.append('file', file);
 
         try {
-            const response = await fetch('http://127.0.0.1:5000/process_csv', {
+            const response = await fetch('https://hierarchyviz.onrender.com/process_csv', {
                 method: 'POST',
                 body: formData
             });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.statusText}`);
+            }
 
             const data = await response.json();
 
             if (data.error) {
                 console.error("Error from server:", data.error);
+                alert("Server error: " + data.error);
                 return;
             }
 
@@ -199,7 +204,8 @@ async function handleImport() {
             populateClustersDropdown(Object.values(sortedClusters).map(arr => arr.join(', ')));
 
         } catch (error) {
-            console.error("Error fetching from Python:", error);
+            console.error("Error fetching from Flask API:", error);
+            alert("Something went wrong while processing the file.");
         }
 
         globalCsvData = csvData;
