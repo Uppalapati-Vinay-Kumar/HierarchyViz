@@ -102,8 +102,6 @@ function buildHierarchy1(csv, category, numericalColumn) {
         const value = +row[numericalColumn];
         let currentNode = root;
 
-        //console.log("bar col sequence",columnSequence);
-
         columnSequence.forEach(col => {
             if (col === category) {
                 const nodeName = row[col];
@@ -163,7 +161,6 @@ function populateDropdown(values) {
         inputField.value = dropdown.value; 
     });
 }
-
 
 
 // Function to handle the imported csv data and call the server to determine the multiple hierarchies and also predict the proper seqeunce for  
@@ -231,7 +228,6 @@ async function setHierarchy() {
 function processData(csvData) {
     data = d3.csvParse(csvData);
     realData = [...data];
-    //console.log("Script data", data);
 }
 
 //Function to build the level information pyramid
@@ -380,14 +376,12 @@ function createTreeDiagram(root) {
         .append("g")
         .attr("transform", `translate(${margin.left - xExtent[0]}, ${margin.top})`);
 
-    // Assign colors to nodes
     const colorScale = d3.scaleOrdinal(customColors);
     hierarchy.children.forEach((child, i) => {
         const color = colorScale(i);
         colorNodes(child, color);
     });
 
-    // Function to assign colors recursively
     function colorNodes(node, color) {
         node.data.color = color;
         if (node.children) {
@@ -395,9 +389,8 @@ function createTreeDiagram(root) {
         }
     }
 
-    // Draw edges connecting the nodes
     treesvg.selectAll(".link")
-        .data(hierarchy.links())
+        .data(hierarchy.links().filter(d => d.source.depth !== 0))
         .enter().append("line")
         .attr("class", "link")
         .attr("x1", d => d.source.x)
@@ -407,9 +400,8 @@ function createTreeDiagram(root) {
         .style("stroke", "#ccc")
         .style("stroke-width", "2px");
 
-    // Drawing nodes
     const node = treesvg.selectAll(".node")
-        .data(nodes)
+        .data(nodes.filter(d => d.depth !== 0)) 
         .enter().append("g")
         .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
@@ -427,12 +419,19 @@ function createTreeDiagram(root) {
                 .style("opacity", 0);
         });
 
-    // Append circles for all nodes based on the hierarchy level
     node.append("circle")
-        .attr("r", d => d.data.highlight ? 8 : 7)
-        .style("fill", d => d.data.color)
-        .style("stroke", d => d.data.highlight ? "black" : "none") // Black border for highlighted nodes
-    .style("stroke-width", d => d.data.highlight ? 2 : 0); // Set stroke width for highlighted nodes
+        .attr("r", d => d.data.highlight ? 10: 6.5)
+        .style("fill", d => {
+            if (d.data.highlight) {
+                const color = d3.color(d.data.color);
+                color.brighter(0.5);
+                return color;
+            } else {
+                return d.data.color; 
+            }
+        })
+        .style("stroke", d => d.data.highlight ? "black" : "none") 
+    .style("stroke-width", d => d.data.highlight ? 2 : 0);
 
 }
 
@@ -473,78 +472,81 @@ function createColorMapping(data, topLevelCategory) {
     return topLevelColorMap;
 }
 
-
-
 // Function to create the bar chart
 function createBarChart(data, drillDownSequence, numericalColumn, drillDownPath) {
     const barsvg = d3.select("#newBarGraph");
-    const width = 1250; 
-    const height = 500; 
-    const margin = { top: 50, right: 150, bottom: 150, left: 150 };  
-
+    width = 1250;
+    height = 500;
+    const margin = { top: 50, right: 150, bottom: 150, left: 200 };
+    
     barsvg.attr("width", width).attr("height", height);
-
     barsvg.selectAll("*").remove();
 
     let currentLevelIndex = drillDownPath.length;
     const currentCategoricalColumn = drillDownSequence[currentLevelIndex];
-
     const hierarchyData = buildHierarchy1(data, currentCategoricalColumn, numericalColumn);
 
-    const topLevelCategory = drillDownSequence[0]; 
-    const colorMapping = createColorMapping(data, topLevelCategory); 
-
+    const topLevelCategory = drillDownSequence[0];  
+    const colorMapping = createColorMapping(data, topLevelCategory);  
     const flattenedData = flattenHierarchy(hierarchyData, colorMapping);
 
+    const barCount = flattenedData.length;
+    const barChartContainer = d3.select("#graphContainer"); 
+
+    if (barCount > 25) {
+        width = 40 * barCount
+        barsvg.attr("width", width).attr("height", height);
+    }
     const x = d3.scaleBand()
-    .domain(flattenedData.map((d, index) => `${d.name}-${index}`)) 
-    .range([margin.left, width - margin.right])
-    .padding(0.05);
+        .domain(flattenedData.map((d, index) => `${d.name}-${index}`)) 
+        .range([margin.left, width - margin.right])
+        .padding(0.05);
 
     const y = d3.scaleLinear()
-    .domain([0, d3.max(flattenedData, d => d.value)])
-    .nice()
-    .range([height - margin.bottom, margin.top]);
+        .domain([0, d3.max(flattenedData, d => d.value)]) 
+        .nice()
+        .range([height - margin.bottom, margin.top]);
 
-
-    // Tooltip element
+    // Tooltip element    
     const tooltip = d3.select("#tooltip");
 
     barsvg.append("g")
-    .selectAll("rect")
-    .data(flattenedData)
-    .join("rect")
-    .attr("x", (d, index) => x(`${d.name}-${index}`))  
-    .attr("y", d => y(d.value))
-    .attr("height", d => y(0) - y(d.value))
-    .attr("width", x.bandwidth())
-    .attr("fill", d => d.color)  
-    .on("mouseover", (event, d) => {
-        tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-        tooltip.html(`Category: ${d.name}<br>Value: ${d.value.toFixed(2)}`)
-            .style("left", (event.pageX + 5) + "px")
-            .style("top", (event.pageY - 28) + "px");
-    })
-    .on("mousemove", (event) => {
-        tooltip.style("left", (event.pageX + 5) + "px")
-            .style("top", (event.pageY - 28) + "px");
-    })
-    .on("mouseout", () => {
-        tooltip.transition()
-            .duration(500)
-            .style("opacity", 0);
-    });
-
+        .selectAll("rect")
+        .data(flattenedData)
+        .join("rect")
+        .attr("x", (d, index) => x(`${d.name}-${index}`))  
+        .attr("y", d => y(d.value))
+        .attr("height", d => y(0) - y(d.value))
+        .attr("width", x.bandwidth())
+        .attr("fill", d => d.color)  
+        .on("mouseover", (event, d) => {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html(`Category: ${d.name}<br>Value: ${d.value.toFixed(2)}`)
+                .style("left", (event.pageX + 5) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mousemove", (event) => {
+            tooltip.style("left", (event.pageX + 5) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", () => {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 
     barsvg.append("g")
         .call(d3.axisLeft(y))
         .attr("transform", `translate(${margin.left},0)`)
-        barsvg.append("g")
+        .style("font-size", "22px");
+
+    barsvg.append("g")
         .call(d3.axisBottom(x).tickFormat((d) => {
             const match = d.match(/^(.*?)->\s*(.*?)-/); 
-            return match ? `${match[1]}-> ${match[2]}` : d; 
+            return match ? match[2] : d;
+
         }))
         .attr("transform", `translate(0,${height - margin.bottom})`)
         .selectAll("text")
@@ -553,18 +555,19 @@ function createBarChart(data, drillDownSequence, numericalColumn, drillDownPath)
         .attr("y", 0)
         .attr("dy", "0.35em")
         .style("text-anchor", "end")
+        .style("font-size", "22px"); 
     
-
-    // Adding x-axis label
+    // Adding x-axis label    
     barsvg.append("text")
         .attr("class", "x label")
         .attr("text-anchor", "end")
-        .attr("x", width - margin.right + 100)
-        .attr("y", height - margin.bottom + 60)  
+        .attr("x", width)
+        .attr("y", height - margin.bottom + 20)  
         .attr("dy", "1em")
+        .style("font-size", "26px")
         .text(currentCategoricalColumn.replace(/-\d+$/, ""));
-
-    // Adding y-axis label
+    
+    // Adding y-axis label    
     barsvg.append("text")
         .attr("class", "y label")
         .attr("text-anchor", "end")
@@ -572,7 +575,6 @@ function createBarChart(data, drillDownSequence, numericalColumn, drillDownPath)
         .attr("y", margin.top)  
         .attr("dy", "1em")
         .attr("transform", "rotate(-90)")
+        .style("font-size", "22px")
         .text(numericalColumn);
 }
-
-

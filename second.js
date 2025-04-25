@@ -294,6 +294,7 @@ function populateDropdown() {
 //Function to create the tree structure
 function createTreeDiagram(root) {
     d3.select("#my_treeStructure svg").selectAll("*").remove();
+
     const hierarchy = d3.hierarchy(root, d => d.children);
     const treeLayout = d3.tree()
         .nodeSize([15, 45])
@@ -320,7 +321,6 @@ function createTreeDiagram(root) {
         colorNodes(child, color);
     });
 
-    // Function to assign colors recursively
     function colorNodes(node, color) {
         node.data.color = color;
         if (node.children) {
@@ -328,9 +328,8 @@ function createTreeDiagram(root) {
         }
     }
 
-    // Drawing edges between nodes
     treesvg.selectAll(".link")
-        .data(hierarchy.links())
+        .data(hierarchy.links().filter(d => d.source.depth !== 0))
         .enter().append("line")
         .attr("class", "link")
         .attr("x1", d => d.source.x)
@@ -340,9 +339,8 @@ function createTreeDiagram(root) {
         .style("stroke", "#ccc")
         .style("stroke-width", "2px");
 
-    // Drawing nodes
     const node = treesvg.selectAll(".node")
-        .data(nodes)
+        .data(nodes.filter(d => d.depth !== 0)) 
         .enter().append("g")
         .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
@@ -360,14 +358,21 @@ function createTreeDiagram(root) {
                 .style("opacity", 0);
         });
 
-       // Append circles for all nodes at the current level as highlighting effect
        node.append("circle")
-       .attr("r", d => d.data.highlight ? 8 : 7)
-       .style("fill", d => d.data.color)
-       .style("stroke", d => d.data.highlight ? "black" : "none") 
+       .attr("r", d => d.data.highlight ? 10 : 6.5)
+       .style("fill", d => {
+        if (d.data.highlight) {
+            const color = d3.color(d.data.color);
+            color.brighter(0.5);  
+            return color;
+        } else {
+            return d.data.color;
+        }
+        })
+        .style("stroke", d => d.data.highlight ? "black" : "none") 
         .style("stroke-width", d => d.data.highlight ? 2 : 0);
-
 }
+
 
 // Event listener to the dropdown for category selection and updating visualizations based on the selected value
 document.getElementById('categorySelect').addEventListener('change', function() {
@@ -394,7 +399,7 @@ function renderTreemap() {
     const treemapWidth = 800;
     const treemapHeight = 600;
     const legendWidth = 200; 
-    const legendHeight = 600;
+    const legendHeight = 600; 
 
     const svg = d3.select("#my_dataviz")
         .append("svg")
@@ -404,19 +409,20 @@ function renderTreemap() {
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     const hierarchyData = buildHierarchy(data, currentCategory, numericalColumnName);
+
     const root = d3.hierarchy(hierarchyData)
-        .sum(d => d.value); 
+        .sum(d => d.value);
+
     const colorScale = d3.scaleOrdinal(customColors);
 
-    // Creating the treemap layout
     d3.treemap()
         .size([treemapWidth, treemapHeight])
         .padding(4)
         .round(true)
         (root);
+
     const leavesWithValues = root.leaves().filter(node => node.value > 0);
 
-    // Adding rectangles for the treemap
     svg.selectAll("rect")
         .data(leavesWithValues)
         .join("rect")
@@ -443,23 +449,43 @@ function renderTreemap() {
                 .style("opacity", 0);
         });
 
-    // Tooltip element
     const tooltip = d3.select("#my_dataviz")
         .append("div")
         .style("opacity", 0)
         .attr("class", "tooltip");
 
-    // Adding text labels for node names
     svg.selectAll("text")
         .data(leavesWithValues)
         .join("text")
-        .attr("x", d => d.x0 + 5)
-        .attr("y", d => d.y0 + 15)
+        .attr("x", d => d.x0 + 5)  
+        .attr("y", d => d.y0 + 5)
         .text(d => d.data.name)
-        .attr("font-size", "12px")
-        .attr("fill", "white");
+        .attr("font-size", d => {
+            const width = d.x1 - d.x0;
+            const height = d.y1 - d.y0;
+            const maxFontSize = Math.min(width, height) / 4;  
+            return Math.min(maxFontSize, 22);  
+        })
+        .attr("fill", "white")
+        .attr("text-anchor", "start")  
+        .attr("alignment-baseline", "hanging")
+        .each(function(d) {
+            let text = d3.select(this);
+            let bbox = this.getBBox();
+            let width = d.x1 - d.x0;
+            let height = d.y1 - d.y0;
 
-    // Legend
+            while (bbox.width > width || bbox.height > height) {
+                let currentFontSize = parseInt(text.style("font-size"));
+                if (currentFontSize > 4) {
+                    text.style("font-size", (currentFontSize - 1) + "px");
+                    bbox = this.getBBox();  
+                } else {
+                    break;
+                }
+            }
+        });
+
     const legend = svg.append("g")
         .attr("class", "legend")
         .attr("transform", `translate(${treemapWidth}, 0)`);
@@ -467,7 +493,7 @@ function renderTreemap() {
     const legendItems = colorScale.domain();
 
     const legendRectSize = 18; 
-    const legendSpacing = 4; 
+    const legendSpacing = 4;
 
     legend.selectAll(".legend-item")
         .data(legendItems)

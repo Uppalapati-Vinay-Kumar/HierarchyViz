@@ -15,11 +15,11 @@
     }
 
     #graphContainer {
-      overflow-x: auto;  
-      width: 100%;  
-      height: 600px;  
-      border: 1px solid #ccc;
-      margin-top: 20px;
+    overflow-x: auto;
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ccc;
+    /* margin-top: 20px; ← REMOVE THIS */
     }
 
     #treeContainer {
@@ -100,22 +100,28 @@
       
       <select id="drillDownDropdown" size="1" style="width: 200px; margin-left: 10px; overflow-y: auto;"></select>
       <button onclick="setHierarchy()">Set Hierarchy</button>
-
-      
       <br>
       <label for="numericalColumnInput">Numerical Column:</label>
       <input type="text" id="numericalColumnInput" placeholder="e.g., Total">
       <button id="updateChartButton">Update Chart</button>
       <br>
+      <br>
+      
       <select id="levelDropdown"></select>
-      <button id="drillDownButton">Drill Down</button>
+      
       <button id="drillUpButton">Drill Up</button>
+      <button id="drillDownButton">Drill Down</button>
+
+      <!-- Add Expanded CSV Output Here -->
+      <!-- <br>
+      <label for="expandedCsvOutput">Expanded CSV Data:</label>
+      <textarea id="expandedCsvOutput" rows="10" cols="50" readonly></textarea> -->
     </div>
   </div>
 
   <div id="graphAndLevelContainer">
     <div id="graphContainer">
-      <svg id="newBarGraph" width="500" height="400"></svg>
+      <svg id="newBarGraph" width="500" height="600"></svg>
     </div>
     <div id="levelDisplay">
       <h2>Level Information</h2>
